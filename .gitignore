@@ -1,0 +1,6 @@
+# .gitignore
+venv/
+data/earthquakes_master.json
+*.so
+*.pyc
+__pycache__/
