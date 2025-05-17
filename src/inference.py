@@ -1,5 +1,7 @@
 # src/inference.py
 
+import os
+import json
 import numpy as np
 import pandas as pd
 import datetime
@@ -28,7 +30,11 @@ def prepare_input(df_raw, scaler, sequence_length=SEQ_LENGTH):
     df[numeric_cols] = scaler.transform(df[numeric_cols])
 
     X = sequence_splitter(df, sequence_length=sequence_length)
-    return X, df.tail(1)  # Last row is the most recent context
+
+    if len(X) == 0:
+        raise ValueError("❌ Not enough data to form a sequence.")
+
+    return X, df.tail(1)
 
 
 def generate_prediction(model, X, context_df):
@@ -63,7 +69,7 @@ def format_natural_language_prediction(pred):
     location_str = latlon_to_location(pred["latitude"], pred["longitude"])
 
     return (
-        f"Prediction:\n"
+        f"🌍 Prediction:\n"
         f"An earthquake of ~{pred['magnitude']:.1f} magnitude is likely to occur "
         f"near {location_str} ({pred['latitude']:.2f}°N, {pred['longitude']:.2f}°E) "
         f"around {predicted_time.strftime('%B %d, %Y')} ± 2 days."
@@ -71,30 +77,34 @@ def format_natural_language_prediction(pred):
 
 
 def run_inference(input_df):
-    model, scaler = load_artifacts()
-    X, context_row = prepare_input(input_df, scaler)
-    pred = generate_prediction(model, X, context_row)
-    message = format_natural_language_prediction(pred)
+    try:
+        model, scaler = load_artifacts()
+        X, context_row = prepare_input(input_df, scaler)
+        pred = generate_prediction(model, X, context_row)
+        message = format_natural_language_prediction(pred)
 
-    response = {
-        "prediction": pred,
-        "natural_language_summary": message
-    }
+        response = {
+            "prediction": pred,
+            "natural_language_summary": message
+        }
 
-    print("✅ Prediction complete.")
-    print(message)
-    return response
+        print("✅ Prediction complete.")
+        print(message)
+        return response
+
+    except Exception as e:
+        print(f"❌ Inference failed: {e}")
+        return {"error": str(e)}
 
 
 if __name__ == "__main__":
     df_full = fetch_earthquake_data()
     df_recent = df_full.sort_values("time").tail(SEQ_LENGTH)
+
     response = run_inference(df_recent)
 
-    # Optional: save as JSON for frontend/api testing
-    import json
+    os.makedirs("outputs", exist_ok=True)
     with open("outputs/inference_result.json", "w") as f:
-        json.dump(response, f, indent=4, default=str)  # handle datetime
+        json.dump(response, f, indent=4, default=str)
     print("📝 Inference result saved to outputs/inference_result.json")
     print("✅ Inference process completed.")
-    
