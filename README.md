@@ -66,6 +66,7 @@ GeoRhythm is built to:
 
 
 📚 References
+
 1.Bhakuni, S. et al. LSTM-Based Temporal Modeling for Accurate Seismic Event Detection, GEHU AI Conference, 2024.
 
 2.Author, F. CNN-LSTM Hybrids for Spatiotemporal Forecasting, Journal of AI Research, 2023.
