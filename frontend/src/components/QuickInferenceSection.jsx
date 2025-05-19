@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Input } from "@/components/ui";
+import { Button } from "./ui/button";
 
 export default function QuickInferenceSection({
   setResult,

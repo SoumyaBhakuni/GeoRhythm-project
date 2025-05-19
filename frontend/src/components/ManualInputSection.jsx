@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Label, Textarea } from "@/components/ui";
-
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import Label from "./ui/label";
 export default function ManualInputSection({
   manualInput,
   setManualInput,
