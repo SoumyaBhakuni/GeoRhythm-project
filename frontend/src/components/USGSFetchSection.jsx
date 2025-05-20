@@ -54,11 +54,11 @@ export default function USGSFetchSection({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Start Timestamp</Label>
+       
         <Input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
       </div>
       <div className="space-y-2">
-        <Label>End Timestamp</Label>
+     
         <Input type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
       </div>
       <Button onClick={handleFetch} disabled={loading}>

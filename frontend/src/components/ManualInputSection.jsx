@@ -1,5 +1,6 @@
 import React from "react";
-import { Button, Label, Textarea } from "@/components/ui";
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
 
 export default function ManualInputSection({
   manualInput,
@@ -52,7 +53,7 @@ export default function ManualInputSection({
 
   return (
     <div className="space-y-4">
-      <Label htmlFor="input-sequence">Enter Sequence Data (JSON array of objects)</Label>
+    
       <Textarea
         id="input-sequence"
         value={manualInput}
