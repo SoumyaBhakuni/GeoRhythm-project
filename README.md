@@ -77,3 +77,28 @@ GeoRhythm is built to:
 
 5.Author, T. AI Applications in Natural Disaster Prediction, Springer, 2022
 
+
+
+Project Setup Instructions
+
+1. Clone the Repository
+
+git clone <your-repo-url>
+cd <project-folder>
+
+2. Run the Frontend
+Navigate into the frontend folder and install dependencies:
+
+cd new_frontend
+npm install
+npm run dev
+The React app will start on http://localhost:5173 by default.
+
+3. Run the Backend
+From the root directory 
+
+pip install -r requirements.txt
+python main.py
+
+
+
