@@ -5,5 +5,9 @@ data/earthquakes_master.json  # Good: Ignore your main data file
 __pycache__/                  # Good: Ignore Python cache directories
 outputs/processed/
 *.npz
-                
+    outputs/processed/
+*.npz
+data/earthquakes_master.json
+            
 venv/
+bfg.jar
