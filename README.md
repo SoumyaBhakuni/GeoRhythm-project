@@ -80,9 +80,3 @@ GeoRhythm is built to:
 
 
 
-
-pip install -r requirements.txt
-python main.py
-
-
-
