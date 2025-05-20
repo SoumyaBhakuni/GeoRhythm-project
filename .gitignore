@@ -1,6 +1,8 @@
-# .gitignore
-venv/
-data/earthquakes_master.json
-*.so
-*.pyc
-__pycache__/
+venv/                         # Good: Ignore virtual environment
+data/earthquakes_master.json  # Good: Ignore your main data file
+*.so                          # Good: Ignore compiled shared object files (common in C/C++ extensions)
+*.pyc                         # Good: Ignore compiled Python files
+__pycache__/                  # Good: Ignore Python cache directories
+outputs/processed/
+*.npz
+                
