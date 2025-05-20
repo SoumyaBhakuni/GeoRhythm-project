@@ -6,3 +6,4 @@ __pycache__/                  # Good: Ignore Python cache directories
 outputs/processed/
 *.npz
                 
+venv/
