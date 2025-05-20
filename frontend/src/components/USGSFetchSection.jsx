@@ -29,10 +29,19 @@ export default function USGSFetchSection({
           end_time: endTime,
         }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        showError(errorData.error || "Error fetching data from USGS or during prediction.");
+        setLoading(false);
+        return;
+      }
+
       const data = await response.json();
-      setResult(data.result);
-      setSummary(data.summary);
-      setPlotUrl(data.plot_url);
+      setResult(data.prediction);
+      setSummary(data.natural_language_summary);
+      setPlotUrl(data.plot_urls || []);  // handles array of plots
+
       showSuccess("USGS-based prediction successful!");
     } catch (err) {
       showError("Error fetching data from USGS or during prediction.");

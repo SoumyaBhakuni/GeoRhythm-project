@@ -11,7 +11,7 @@ from flask_cors import CORS
 from src.config import SEQ_LENGTH, MODEL_PATH, SCALER_PATH
 from src.utils import (
     load_scaler, load_keras_model, sequence_splitter,
-    latlon_to_location, plot_prediction_vs_truth
+    latlon_to_location
 )
 from src.inference import run_inference
 from src.fetch_from_mongo import fetch_latest_sequence, fetch_random_sequence
@@ -67,37 +67,29 @@ def predict():
         if not isinstance(data, list) or len(data) < SEQ_LENGTH:
             return jsonify({"error": f"Input must be a list of at least {SEQ_LENGTH} records."}), 400
 
-        X_input, context_row = prepare_input(data, scaler)
-        preds = model.predict(X_input)
+        result, plot_paths = run_inference(model, scaler, data)
 
-        y_cls_prob = preds[0][:, 0]
-        y_mag = preds[1][:, 0]
-        y_lat = preds[2][:, 0]
-        y_lon = preds[3][:, 0]
-        y_time = preds[4][:, 0]
+        # Defensive get for context_time:
+        context_time = result.get("context_time", None)
+        if context_time is None:
+            return jsonify({"error": "'context_time' missing from prediction result"}), 500
 
-        result = {
-            "event_occurred": int(y_cls_prob[-1] > 0.5),
-            "confidence": float(y_cls_prob[-1]),
-            "magnitude": float(y_mag[-1]),
-            "latitude": float(y_lat[-1]),
-            "longitude": float(y_lon[-1]),
-            "time_delta_days": float(y_time[-1]),
-            "context_time": context_row["time"]
-        }
+        message = format_prediction(result, {"time": context_time})
 
-        message = format_prediction(result, context_row)
+        # Defensive handling for plot_paths:
+        if plot_paths is None:
+            plot_paths = []
 
-        # Plot actual (from last sequence) vs predicted magnitude
-        true_vals = [entry["mag"] for entry in data[-SEQ_LENGTH:]]
-        pred_vals = true_vals[:-1] + [result["magnitude"]]  # Dummy: predict only last step
-        plot_path = "outputs/plots/predict_manual.png"
-        plot_prediction_vs_truth(true_vals, pred_vals, plot_path)
+        plot_urls = [
+            f"/plot/{os.path.basename(path)}"
+            for path in plot_paths
+            if os.path.exists(path)
+        ]
 
         return jsonify({
             "prediction": result,
             "natural_language_summary": message,
-            "plot_url": "/plot/predict-manual"
+            "plot_urls": plot_urls
         })
 
     except Exception as e:
@@ -120,13 +112,6 @@ def predict_latest():
             "context_time": context_row["time"]
         }
 
-        plot_path = os.path.join(PLOTS_DIR, "predict_latest.png")
-        plot_prediction_vs_truth(
-            true_vals=[context_row["mag"]],
-            pred_vals=[result["magnitude"]],
-            save_path=plot_path
-        )
-
         return jsonify({
             "prediction": result,
             "natural_language_summary": format_prediction(result, context_row)
@@ -136,20 +121,17 @@ def predict_latest():
 
 @app.route("/generate-sample-sequence", methods=["GET"])
 def generate_sample_sequence():
-    try:
-        sequence = fetch_random_sequence()
-        plot_path = os.path.join(PLOTS_DIR, "sample_sequence_plot.png")
-        plot_prediction_vs_truth(
-            true_vals=[item["mag"] for item in sequence],
-            pred_vals=[item["mag"] * 0.95 for item in sequence],  # Dummy
-            save_path=plot_path
-        )
-        return jsonify({
-            "sequence": sequence,
-            "plot_url": "/plot/sample-sequence"
+    sequence = []
+    for i in range(30):
+        sequence.append({
+            "time": f"2023-01-01T00:{i:02d}:00Z",
+            "latitude": 35.5 + i * 0.01,
+            "longitude": -117.5 + i * 0.01,
+            "depth": 10 + i * 0.1,
+            "mag": 4.5 + (i % 3) * 0.1
         })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    return jsonify(sequence)
+
 
 @app.route("/fetch-usgs-latest-month", methods=["GET"])
 def fetch_usgs_latest():
@@ -159,36 +141,14 @@ def fetch_usgs_latest():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-# ---------------- PLOT SERVING ROUTES -------------------
+# ---------------- UNIVERSAL PLOT ROUTE -------------------
 
-@app.route("/plot/predict-manual")
-def plot_manual():
-    path = os.path.join(PLOTS_DIR, "predict_manual.png")
+@app.route("/plot/<filename>")
+def serve_plot(filename):
+    path = os.path.join(PLOTS_DIR, filename)
     if os.path.exists(path):
         return send_file(path, mimetype="image/png")
-    return jsonify({"error": "Manual prediction plot not found."}), 404
-
-@app.route("/plot/predict-latest")
-def plot_latest():
-    path = os.path.join(PLOTS_DIR, "predict_latest.png")
-    if os.path.exists(path):
-        return send_file(path, mimetype="image/png")
-    return jsonify({"error": "Latest prediction plot not found."}), 404
-
-@app.route("/plot/predict-manual")
-def serve_predict_manual_plot():
-    return send_file("outputs/plots/predict_manual.png", mimetype="image/png")
-
-@app.route("/plot/predict-latest")
-def serve_predict_latest_plot():
-    return send_file("outputs/plots/predict_latest.png", mimetype="image/png")
-
-@app.route("/plot/sample-sequence")
-def plot_sample():
-    path = os.path.join(PLOTS_DIR, "sample_sequence_plot.png")
-    if os.path.exists(path):
-        return send_file(path, mimetype="image/png")
-    return jsonify({"error": "Sample plot not found."}), 404
+    return jsonify({"error": f"Plot {filename} not found."}), 404
 
 # ---------------- RUN APP -------------------
 

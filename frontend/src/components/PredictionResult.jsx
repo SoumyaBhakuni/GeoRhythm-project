@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/Card";
 
-export default function PredictionResult({ summary, plotUrl, result }) {
+export default function PredictionResult({ summary, plotUrl, result, plotUrls }) {
   if (!result) return null;
 
   return (
@@ -14,14 +14,23 @@ export default function PredictionResult({ summary, plotUrl, result }) {
           </CardContent>
         </Card>
       )}
-      {plotUrl && (
+
+      {plotUrls && plotUrls.length > 0 && (
         <Card>
           <CardContent className="space-y-2">
-            <h3 className="text-lg font-semibold">📊 Sequence Plot</h3>
-            <img src={plotUrl} alt="Prediction Plot" className="w-full border rounded shadow" />
+            <h3 className="text-lg font-semibold">📊 Inference Plots</h3>
+            {plotUrls.map((url, idx) => (
+              <img
+                key={idx}
+                src={`http://localhost:5000${url}`}
+                alt={`Plot ${idx + 1}`}
+                className="w-full border rounded shadow"
+              />
+            ))}
           </CardContent>
         </Card>
       )}
+
       {result && (
         <Card>
           <CardContent>

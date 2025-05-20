@@ -76,25 +76,25 @@ def format_natural_language_prediction(pred):
     )
 
 
-def run_inference(input_df):
+def run_inference(model, scaler, data):
     try:
-        model, scaler = load_artifacts()
+        if isinstance(data, list):
+            input_df = pd.DataFrame(data)
+        else:
+            input_df = data
+
         X, context_row = prepare_input(input_df, scaler)
         pred = generate_prediction(model, X, context_row)
         message = format_natural_language_prediction(pred)
 
-        response = {
-            "prediction": pred,
-            "natural_language_summary": message
-        }
-
         print("✅ Prediction complete.")
         print(message)
-        return response
+        # Return prediction dict directly, not wrapped in {"prediction": ...}
+        return pred, []  # plot paths list
 
     except Exception as e:
         print(f"❌ Inference failed: {e}")
-        return {"error": str(e)}
+        return {"error": str(e)}, []
 
 
 if __name__ == "__main__":

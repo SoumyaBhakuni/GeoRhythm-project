@@ -6,6 +6,7 @@ import USGSFetchSection from "./USGSFetchSection";
 import PredictionResult from "./PredictionResult";
 
 export default function InferencePanel() {
+  const [activeTab, setActiveTab] = useState("manual");
   const [result, setResult] = useState(null);
   const [summary, setSummary] = useState("");
   const [plotUrl, setPlotUrl] = useState("");
@@ -19,8 +20,17 @@ export default function InferencePanel() {
   const showError = (msg) => alert(msg);
   const showSuccess = (msg) => console.log(msg);
 
+  const handleTabChange = (value) => {
+    setActiveTab(value);
+    // Reset outputs on tab change
+    setResult(null);
+    setSummary("");
+    setPlotUrl("");
+    setLoading(false);
+  };
+
   return (
-    <Tabs defaultValue="manual" className="space-y-6">
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
       <TabsList>
         <TabsTrigger value="manual">📝 Manual Entry</TabsTrigger>
         <TabsTrigger value="quick">⚡ Quick Predict</TabsTrigger>

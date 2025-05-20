@@ -6,6 +6,7 @@ from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model, save_model
 from src.config import SEQ_LENGTH, SCALER_PATH
+from geopy.geocoders import Nominatim
 
 # -----------------------
 # 🔧 Directory Utilities
@@ -15,6 +16,29 @@ def ensure_dir(path):
     """Ensure a directory exists (file or directory path-safe)."""
     dir_path = path if os.path.isdir(path) else os.path.dirname(path)
     os.makedirs(dir_path, exist_ok=True)
+
+def latlon_to_location(lat, lon):
+    """
+    Converts latitude and longitude into a human-readable location string.
+    """
+    try:
+        geolocator = Nominatim(user_agent="grhythm_model")
+        location = geolocator.reverse((lat, lon), timeout=10)
+        return location.address if location else f"{lat:.2f}, {lon:.2f}"
+    except Exception:
+        return f"{lat:.2f}, {lon:.2f}"
+
+def sequence_splitter(df, sequence_length):
+    """
+    Converts a DataFrame into a 3D NumPy array of shape (1, sequence_length, num_features),
+    assuming the data is already sorted by time.
+    """
+    if len(df) < sequence_length:
+        raise ValueError(f"Insufficient data: need at least {sequence_length} rows.")
+
+    window = df.iloc[-sequence_length:].copy()
+    window.drop(columns=["time"], inplace=True, errors="ignore")
+    return np.expand_dims(window.values, axis=0)
 
 # -----------------------
 # ⚙️ Preprocessing

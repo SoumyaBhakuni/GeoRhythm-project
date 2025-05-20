@@ -25,3 +25,8 @@ PLOT_DIR = "outputs/plots/"
 # Model + Scaler
 MODEL_PATH = f"{MODEL_DIR}seismic_hybrid_model.h5"
 SCALER_PATH = f"{MODEL_DIR}hybrid_scaler.pkl"
+
+# PostgreSQL credentials
+PG_CONN_STR = "postgresql://neondb_owner:npg_PWdAUj7thi4w@ep-long-wildflower-a4nkjfc2-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require"
+
+CHUNK_SIZE = 10000

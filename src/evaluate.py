@@ -17,7 +17,7 @@ def evaluate():
 
     try:
         print("📁 Loading local dataset from data/dummy_earthquakes.json...")
-        df = pd.read_json("data/dummy_earthquakes.json")
+        df = pd.read_json("data/earthquakes_master.json")
         print(f"✅ Loaded {len(df)} records.")
     except Exception as e:
         print(f"❌ Failed to load local dataset: {e}")
