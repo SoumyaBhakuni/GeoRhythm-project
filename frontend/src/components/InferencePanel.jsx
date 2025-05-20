@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ManualInputSection from "./ManualInputSection";
 import QuickInferenceSection from "./QuickInferenceSection";
 import USGSFetchSection from "./USGSFetchSection";

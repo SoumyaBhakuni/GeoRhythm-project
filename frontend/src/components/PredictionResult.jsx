@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function PredictionResult({ summary, plotUrl, result, plotUrls }) {
   if (!result) return null;
