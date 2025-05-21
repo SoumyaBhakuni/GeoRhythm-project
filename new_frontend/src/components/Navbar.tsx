@@ -51,6 +51,9 @@ const Navbar: React.FC = () => {
             <Link to="/wave-detector" className={linkClasses('/wave-detector')}>
               Wave Detector
             </Link>
+            <Link to="/inference-panel" className={linkClasses('/inference-panel')}>
+              InferencePanel
+            </Link>
             
           </div>
 
